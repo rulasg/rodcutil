@@ -54,7 +54,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_APP_TITLE           "RodcUtil v1.1.2.0"
+    IDS_APP_TITLE           "RodcUtil v1.0.2.0 (BETA)"
     IDS_LOGO_STRING_1       "Windows Server 2008 RODC Tool"
     IDS_LOGO_STRING_2       "Microsoft EMEA GTSC CPR Platforms Team"
     IDS_LOGO_STRING_3       "by roblane & raulg"
@@ -79,8 +79,8 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_SYS_DEFAULT
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,1,2,0
- PRODUCTVERSION 1,1,0,0
+ FILEVERSION 1,0,2,0
+ PRODUCTVERSION 1,0,0,0
  FILEFLAGSMASK 0x37L
 #ifdef _DEBUG
  FILEFLAGS 0x21L
@@ -98,14 +98,14 @@ BEGIN
             VALUE "Comments", "Helping tool to support Windows Server 2008 RODC Role"
             VALUE "CompanyName", "Microsoft - EMEA GTSC CPR Platforms Team"
             VALUE "FileDescription", "Windows Server 2008 RODC Tool"
-            VALUE "FileVersion", "1, 1, 2, 0"
+            VALUE "FileVersion", "1, 0, 2, 0"
             VALUE "InternalName", "rodcutil"
             VALUE "LegalCopyright", "Copyright (C) 2007"
             VALUE "LegalTrademarks", "rodcutil v1.0 2007 by roblane & raulg."
             VALUE "OriginalFilename", "rodcutil.exe"
             VALUE "ProductName", "rodcutil Application"
-            VALUE "ProductVersion", "1, 1, 0, 0"
-            VALUE "SpecialBuild", "Beta v 1.1"
+            VALUE "ProductVersion", "1, 0, 0, 0"
+            VALUE "SpecialBuild", "Beta  v 1.0"
         END
     END
     BLOCK "VarFileInfo"

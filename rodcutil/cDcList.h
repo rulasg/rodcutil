@@ -44,10 +44,6 @@ public:
 	void DisplayDcInfo(void);
 	// return the DC Dsa Guid
 	CString GetDsaDcGuid(void);
-	// copies information to DcInfo from a DcInfo
-	int operator=(cDcInfo dcInfo);
-private:
-	ULONG m_ID;
 };
 class cDcList
 {
@@ -59,8 +55,6 @@ private:
 	CString m_DCsToList;
 	//DS_DOMAIN_CONTROLLER_INFO_LEVEL * m_pDcList;
 	CArray<cDcInfo> * m_pDcInfoList;
-	//CArray<CString> * m_pTrustList;
-	CStringArray * m_pTrustList;
 	int m_DS_DOMAIN_CONTROLLER_INFO_LEVEL_NUM;
 	void EmptyList(void);
 
@@ -118,11 +112,4 @@ private:
 public:
 	// return server name from guid. If guid not present servername = the imput guid
 	CString Guid2Name(CString guid);
-	// return a DC name of the domain and corresponding to flags
-	CString GetDcName(CString Domain, int Flags = 0);
-	CString GetDcName();
-	// created the  trust list
-	int GetTrustList(void);
-	// Saves all the Dc's of the forest
-	int GetDcListAll(void);
 };

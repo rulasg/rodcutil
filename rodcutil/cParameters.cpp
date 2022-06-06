@@ -31,7 +31,6 @@ int cParameters::Initialize(int argc, _TCHAR* argv[])
 	m_CommandsArray->Add(L"help");						//3
 	m_CommandsArray->Add(L"experthelp");				//4
 	m_CommandsArray->Add(L"dsaguidchk");				//5
-	m_CommandsArray->Add(L"getdcname");					//6
 	
 
 
@@ -384,7 +383,7 @@ void cParameters::DisplayRootHelp(void)
 	dbg.dataPrint(L"cParameters::DisplayHelp",L"rodcutil.exe [options] { command }");
 	dbg.dataPrint(L"cParameters::DisplayHelp",L"");	
 	dbg.dataPrint(L"cParameters::DisplayHelp",L"This tool is Intended to help support environment with RODC's.");	
-	dbg.dataPrint(L"cParameters::DisplayHelp",L"It will performe different commands to improve and help on the support of possible problems related with RODC.");	
+	dbg.dataPrint(L"cParameters::DisplayHelp",L"It will perform different commands to improve and help on the support of possible problems related with RODC.");	
 	dbg.dataPrint(L"cParameters::DisplayHelp",L"If you feel that we are missing important scenarios let us now.");	
 	dbg.dataPrint(L"cParameters::DisplayHelp",L"");	
 	dbg.dataPrint(L"cParameters::DisplayHelp",L"Feedback mailto:rodcutil@microsoft.com | mailto:roblane@microsoft.com;raulg@microsoft.com");	

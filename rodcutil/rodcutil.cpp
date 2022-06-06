@@ -215,33 +215,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 
 			break;
 
-		case 6:  //GetDcName
 			
-			pDcList= new (cDcList);
-
-			//create object check
-			if (!pDcList) 					
-			{
-				g_GLE = ERR_NOT_ENOUGH_MEMORY;
-				dbg.error(L"Main",L"Error not enough memory [ %d ]",g_GLE);
-				break;
-			}
-
-			//check parameters
-			if (pDcList->Initialize(param)!=ERR_SUCCESS)
-			{
-				pDcList->DisplayHelp();
-				break;
-			}
-
-			//CString name = pDcList->GetDcName(L"europe");
-			dbg.dataPrint(L"Main",L"%wS",pDcList->GetDcName(NULL));
-
-			delete pDcList;
-
-
-			break;
-
 		default:
 			dbg.error(L"Main",L"ERROR: Command unknown");
 			param->DisplayHelp();

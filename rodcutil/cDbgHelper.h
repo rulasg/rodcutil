@@ -55,7 +55,6 @@ public:
 	int error(CString function,CString str, int param1);
 	int error(CString function,CString str, CString param1);
 	int error(CString function,CString str, int param1,CString param2);
-	int error(CString function,CString str, CString param1,CString param2);
 
 	//print warnings
 	int warning (CString function,CString str);

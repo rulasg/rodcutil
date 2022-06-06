@@ -255,14 +255,6 @@ int cDbgHelper::error(CString function,CString str, int param1,CString param2)
 	return 0;
 }
 
-int cDbgHelper::error(CString function,CString str, CString param1,CString param2)
-{
-	CString strAux;
-	strAux.Format(str,param1,param2);
-	error(function,strAux);	
-	return 0;
-}
-
 int cDbgHelper::error(CString function,CString str)
 {
 	SetColor(COLOR_ERROR);

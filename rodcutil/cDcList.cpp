@@ -1,6 +1,4 @@
 #include "StdAfx.h"
-#include <Dsgetdc.h>
-#include <lm.h>
 #include "helper.h"
 //#include "cDcInfo.h"
 #include "cDcList.h"
@@ -10,19 +8,13 @@ cDcInfo::cDcInfo(void)
 : m_DcDnsName (_T(""))
 , m_DcGUID (_T(""))
 , m_DcFlags (0)
-, m_ID(0)
 {
-	static ULONG id;
-	m_ID = id++;
-	//dbg.trace(L"cDcInfo::cDcInfo",L"Creating DcInfo object [%d] ",m_ID);
-	
-	
-	
+
 }
 
 cDcInfo::~cDcInfo(void)
 {
-	//dbg.trace(L"cDcInfo::~cDcInfo",L"Destroying [%d] [%wS]",m_ID,this->m_DcDnsName);
+	dbg.trace(L"cDcInfo::~cDcInfo",L"Destroying %wS",this->m_DcDnsName);
 
 }
 
@@ -30,9 +22,8 @@ cDcInfo::~cDcInfo(void)
 cDcList::cDcList(void)
 : m_DCsToList(_T("*"))
 {
-	dbg.trace(L"cDcList::cDcList",L"Creating DcList object" );
+	dbg.trace(L"cDcList::cDcList",L"Creating DcList object");
 	m_pDcInfoList = NULL;
-	m_pTrustList = NULL;
 	m_DS_DOMAIN_CONTROLLER_INFO_LEVEL_NUM = g_FLAGS & FLAG_2K3_COMPATIBILITY_MODE? DS_DOMAIN_CONTROLLER_INFO_LEVEL_NUM_2K3:DS_DOMAIN_CONTROLLER_INFO_LEVEL_NUM_2K8;
 	EmptyList();
 }
@@ -40,20 +31,7 @@ cDcList::cDcList(void)
 cDcList::~cDcList(void)
 {	
 	EmptyList();
-	
-	//empty the domain trust list
-	if (m_pTrustList)	
-	{
-		delete m_pTrustList;
-		m_pTrustList=NULL;
-	}
 	dbg.trace(L"cDcList::cDcList",L"Deleting DcList object");
-}
-
-// Loads dclist to object using object memeber info
-int cDcList::GetDcList(void)
-{
-	return GetDcList(m_RefDC,m_Domain,m_DCsToList);
 }
 
 // Returns DC's in the domain based on memeber DcToList that by default is "*"
@@ -61,7 +39,6 @@ int cDcList::GetDcList(CString RefDC,CString Domain)
 {
 	return GetDcList(RefDC,Domain,m_DCsToList);
 }
-
 
 // Queries DC List for DC filtered by DcToList
 int cDcList::GetDcList(CString RefDC,CString Domain,CString DCsToList)
@@ -74,19 +51,11 @@ int cDcList::GetDcList(CString RefDC,CString Domain,CString DCsToList)
 	int retI = ERROR_SUCCESS;	
 	DS_DOMAIN_CONTROLLER_INFO_LEVEL_2K8 * pDcList = NULL ;
 	DS_DOMAIN_CONTROLLER_INFO_LEVEL_2K3 * pDcList2k3;
-
-
-	//if we want all the DC's in the forest
-	if (Domain==L"*")
-		return GetDcListAll();
-
-	//cDcInfo* p_DcList;
-	//p_DcList = new cDcInfo;
-	cDcInfo dcInfo;
+	//pDcList2k8;
 	
 	//check and reset actual information if exists
 	EmptyList();
-
+	
 	//set DC to connect to
 	m_RefDC = RefDC;
 	m_DCsToList = DCsToList;
@@ -138,29 +107,21 @@ int cDcList::GetDcList(CString RefDC,CString Domain,CString DCsToList)
 	UnBind(&hDS);
 
 	//Add DC's info to DcInfoList
-	//cDcInfo* p_DcList;
-	//p_DcList = new cDcInfo;
-	//cDcInfo dcInfo;
-	
+	cDcInfo* p_DcList;
 	pDcList2k3 = (DS_DOMAIN_CONTROLLER_INFO_LEVEL_2K3 * ) pDcList;
 	m_pDcInfoList = new CArray<cDcInfo>;
 	for (int i = 0 ; i < m_DcCount ; i++)
 	{
-		
+		p_DcList = new cDcInfo;
 		if (g_FLAGS & FLAG_2K3_COMPATIBILITY_MODE)
-			//p_DcList->SaveDcInfo2List((void*)&pDcList2k3[i]);
-			dcInfo.SaveDcInfo2List((void*)&pDcList2k3[i]);
-
+			p_DcList->SaveDcInfo2List((void*)&pDcList2k3[i]);
 		else 
-			//p_DcList->SaveDcInfo2List((void*)&pDcList[i]);
-			dcInfo.SaveDcInfo2List((void*)&pDcList[i]);
+			p_DcList->SaveDcInfo2List((void*)&pDcList[i]);
 
-		//p_DcList->SaveDcInfo2List((void*)&pDcList[i]);
-		//m_pDcInfoList->Add(*p_DcList);
-		m_pDcInfoList->Add(dcInfo);
+//		p_DcList->SaveDcInfo2List((void*)&pDcList[i]);
+		m_pDcInfoList->Add(*p_DcList);		
 	
 	}
-	//delete p_DcList;
 
 	if (pDcList)DsFreeDomainControllerInfo(DS_DOMAIN_CONTROLLER_INFO_LEVEL_NUM,m_DcCount,pDcList);
 
@@ -171,8 +132,6 @@ error:
 	if (pDcList)DsFreeDomainControllerInfo(DS_DOMAIN_CONTROLLER_INFO_LEVEL_NUM,m_DcCount,pDcList);
 	return g_GLE;
 }
-
-
 
 // empty actual DCList information
 void cDcList::EmptyList(void)
@@ -189,18 +148,8 @@ void cDcList::EmptyList(void)
 */
 	
 	//empty DcInfoList array.
-	if (m_pDcInfoList){
+	if (m_pDcInfoList)
 		delete m_pDcInfoList;
-		m_pDcInfoList=NULL;
-	}
-/*
-	//empty the domain trust list
-	if (m_pTrustList)	
-	{
-		delete m_pTrustList;
-		m_pTrustList=NULL;
-	}
-*/
 }
 
 // bind to server
@@ -336,23 +285,22 @@ void cDcList::DisplayHelp(void)
 	//dbg.print(L"cDcList::DisplayHelp",L"");
 	dbg.dataPrint(L"cDcList::DisplayHelp",L"[DCLIST]");	
 	dbg.dataPrint(L"cDcList::DisplayHelp",L"");
-	dbg.dataPrint(L"cDcList::DisplayHelp",L"rodcutil.exe dclist  ( * | RODC ) [ ( <domain> | * ) [<RefDcName>]] ");	
+	dbg.dataPrint(L"cDcList::DisplayHelp",L"rodcutil.exe dclist <RefDcName> [ ( * | RODC ) [<domain>]]");	
 	dbg.dataPrint(L"cDcList::DisplayHelp",L"");	
 	dbg.dataPrint(L"cDcList::DisplayHelp",L"Displays the list of DC's in the Domain.");
-	dbg.dataPrint(L"cDcList::DisplayHelp",L"");	
-	dbg.dataPrint(L"cDcList::DisplayHelp",L"*          All DC's in the domain or all domains in the forest");
+	dbg.dataPrint(L"cDcList::DisplayHelp",L"");
+	dbg.dataPrint(L"cDcList::DisplayHelp",L"RefDcName  Dc used to build DC list");		
+	dbg.dataPrint(L"cDcList::DisplayHelp",L"*          All DC's in the domain");
 	dbg.dataPrint(L"cDcList::DisplayHelp",L"RODC       Read Only DCs in the domain");
 	dbg.dataPrint(L"cDcList::DisplayHelp",L"domain     Specifies the domain to work on. By default uses the domain of the running computer.");	
-	dbg.dataPrint(L"cDcList::DisplayHelp",L"RefDcName  Dc used to build DC list. If not specified system will resolve to DC in the domain.");			
 	dbg.dataPrint(L"cDcList::DisplayHelp",L"");	
 	dbg.dataPrint(L"cDcList::DisplayHelp",L"Sample: ");
-	dbg.dataPrint(L"cDcList::DisplayHelp",L"\t rodcutil.exe dclist * ra03dom.com  dcName ");
-	dbg.dataPrint(L"cDcList::DisplayHelp",L"\t rodcutil.exe dclist * ");
-	dbg.dataPrint(L"cDcList::DisplayHelp",L"\t rodcutil.exe dclist * * ");
-	dbg.dataPrint(L"cDcList::DisplayHelp",L"\t rodcutil.exe dclist rodc * ");
-	dbg.dataPrint(L"cDcList::DisplayHelp",L"\t rodcutil.exe dclist * ra03dom.com ");
-	dbg.dataPrint(L"cDcList::DisplayHelp",L"\t rodcutil.exe dclist dcName.ra03dom.com  RODC");	
-	dbg.dataPrint(L"cDcList::DisplayHelp",L"\t rodcutil.exe dclist RODC ra03dom.com dcName.ra03dom.com ");		
+	dbg.dataPrint(L"cDcList::DisplayHelp",L"\t rodcutil.exe dclist dcName  ");
+	dbg.dataPrint(L"cDcList::DisplayHelp",L"\t rodcutil.exe dclist dcName.ra03dom.com  *");
+	dbg.dataPrint(L"cDcList::DisplayHelp",L"\t rodcutil.exe dclist dcName.ra03dom.com  RODC");
+	dbg.dataPrint(L"cDcList::DisplayHelp",L"\t rodcutil.exe dclist dcName * ra03dom.com");	
+	dbg.dataPrint(L"cDcList::DisplayHelp",L"\t rodcutil.exe dclist dcName.ra03dom.com RODC ra03dom.com");	
+	
 	
 	dbg.dataPrint(L"cDcList::DisplayHelp",L"");
 
@@ -363,54 +311,42 @@ void cDcList::DisplayHelp(void)
 int cDcList::Initialize(cParameters* param)
 {
 	//int paramCount = 2;
-	////dclist <ReferenceDCName> [ * | RODCs ] [domain]"
-	//dclist < * | RODCs >      [domain]  [ReferenceDCName]
+	//dclist <ReferenceDCName> [ * | RODCs ] [domain]"
 	// 0            1               2           3
 	dbg.trace(L"cDcList::Initialize",L"Initialization of parameters");
 	
 	//check mandatory parametes
-	
-	// 0. Chcek minimum number of parameters
+	//reading reference server
 	if (param->GetCount()< 2)
 		return ERR_WRONG_PARAMETERS;
-
-	// 1. Read DcToList
-
-	//reading DCsToList param. 
-
-	if (param->GetParam(1).MakeUpper()== L"RODC")
-	{
-		m_DCsToList=L"RODC";	
-	}
 	else
-		if (param->GetParam(1)== L"*")
-			m_DCsToList= L"*";
-		else
-			return ERR_WRONG_PARAMETERS;
-
-	// 3. Read Domain
-	//reading domain
+		m_RefDC=param->GetParam(1);
+	
+	//reading DCsToList param. Default is "*"
 	if (param->GetCount() < 3)
+		m_DCsToList= "*";		
+	else 
+	{
+		if (param->GetParam(2).MakeUpper()== L"RODC")
+		{
+			m_DCsToList=L"RODC";			
+		}
+		else
+			if (param->GetParam(2)== L"*")
+				m_DCsToList= param->GetParam(2);
+			else
+				return ERR_WRONG_PARAMETERS;
+	}
+
+	//reading domain
+	if (param->GetCount() < 4)
 		//m_Domain = _wgetenv(L"USERDNSDOMAIN");
 		m_Domain.GetEnvironmentVariableW(L"USERDNSDOMAIN");
 	else 
-		m_Domain=param->GetParam(2);
-	
-	// 4. Read selected server
-	//reading reference server
-	//if domain == * no need to Specify ref DC
-	CString userDomain;
-	if (param->GetCount()< 4)
-	{
-		if (m_Domain==L"*")
-			m_RefDC=GetDcName();
-		else
-			m_RefDC=GetDcName(m_Domain);
-	}
-	else
-		m_RefDC=param->GetParam(3);
+		m_Domain=param->GetParam(3);
 
 	return ERROR_SUCCESS;
+
 }
 
 // trace the actual active parameters used by dclist
@@ -421,6 +357,11 @@ void cDcList::DisplayParameters(void)
 	dbg.trace(L"cDcList::DisplayParameters",L"m_Domain    : [ %wS ]",m_Domain);
 }
 
+// Loads dclist to object using object memeber info
+int cDcList::GetDcList(void)
+{
+	return GetDcList(m_RefDC,m_Domain,m_DCsToList);
+}
 
 // return number of DC in the list
 int cDcList::GetCount(void)
@@ -610,17 +551,15 @@ void cDcInfo::SaveDcInfo2List(void* pDclist)
 
 void cDcInfo::SaveDcInfo2List_2k3(DS_DOMAIN_CONTROLLER_INFO_LEVEL_2K3* p_DcInfo)
 {
-	//exception
-	m_fIsRodc=false;
-
 	//flags
 	m_fIsPdc=p_DcInfo->fIsPdc;
 	m_fIsGc=p_DcInfo->fIsGc;
 	m_fDsEnabled=p_DcInfo->fDsEnabled;
-		
+	m_fIsRodc=false;
+	
 	//Computer name
 	m_DcDnsName=p_DcInfo->DnsHostName;
-	m_DcSiteName=p_DcInfo->SiteName;	
+	m_DcSiteName=p_DcInfo->SiteName;
 		
 	BuildGUIDString(&m_DcGUID,&(p_DcInfo->NtdsDsaObjectGuid));
 	
@@ -629,16 +568,16 @@ void cDcInfo::SaveDcInfo2List_2k3(DS_DOMAIN_CONTROLLER_INFO_LEVEL_2K3* p_DcInfo)
 }
 void cDcInfo::SaveDcInfo2List_2k8(DS_DOMAIN_CONTROLLER_INFO_LEVEL_2K8* p_DcInfo)
 {
-	//exception
+	
 	m_fIsRodc=p_DcInfo->fIsRodc;
 	
 	//flags
 	m_fIsPdc=p_DcInfo->fIsPdc;
 	m_fIsGc=p_DcInfo->fIsGc;
 	m_fDsEnabled=p_DcInfo->fDsEnabled;
-			
+		
 	//Computer name
-	m_DcDnsName =p_DcInfo->DnsHostName;	
+	m_DcDnsName=p_DcInfo->DnsHostName;
 	m_DcSiteName=p_DcInfo->SiteName;
 		
 	BuildGUIDString(&m_DcGUID,&(p_DcInfo->NtdsDsaObjectGuid));	
@@ -661,156 +600,4 @@ void cDcInfo::DisplayDcInfo(void)
 CString cDcInfo::GetDsaDcGuid(void)
 {
 	return m_DcGUID;
-}
-
-// return a DC name of the domain and corresponding to flags
-CString cDcList::GetDcName()
-{
-	CString aux;
-	aux.GetEnvironmentVariableW(L"USERDNSDOMAIN");
-	return GetDcName(aux);
-
-}
-CString cDcList::GetDcName(CString Domain, int Flags)
-{
-	int retI;
-	PDOMAIN_CONTROLLER_INFO DcInfo =NULL;
-	CString DcName;
-	int flags =Flags;	
-
-	dbg.trace(L"cDcList::GetDcName",L"Getting DC for Domain [%wS] from [%wS]",Domain,m_RefDC);		
-
-	retI=DsGetDcName(m_RefDC,Domain,NULL,NULL,flags,&DcInfo);
-
-	if(retI != ERROR_SUCCESS)
-	{
-		dbg.error(L"cDcList::GetDcName",L"Error calling DsGetDcName with error [%d]",retI);	
-		DcName.Empty();
-	}
-	else
-	{
-		DcName=DcInfo->DomainControllerName;
-		dbg.trace(L"cDcList::GetDcName",L"Found [%wS]for Domain [%wS]",DcName,Domain);
-	
-	}
-	
-	if (DcInfo) 
-		NetApiBufferFree(DcInfo);
-
-	return DcName;
-}
-
-// created the  trust list
-int cDcList::GetTrustList(void)
-{
-	PDS_DOMAIN_TRUSTS trusts = NULL;
-	ULONG count = 0;
-	int retI = 0;
-
-
-	dbg.trace(L"cDcList::GetTrustList",L"Creating trust list");
-	
-	dbg.trace(L"cDcList::GetTrustList",L"Calling DsEnumerateDomainTrusts ");
-	
-	//obtain the trust list
-	// ask for domains in the forest
-	retI = DsEnumerateDomainTrusts(NULL,DS_DOMAIN_IN_FOREST,&trusts,& count);
-	if (retI != ERROR_SUCCESS)
-	{
-		dbg.error(L"cDcList::GetTrustList",L"Error calling DsEnumerateDomainTrusts [%d] ",retI);
-		return retI;
-	}
-	dbg.trace(L"cDcList::GetTrustList",L"Found [%d] trustes domain",count);
-
-	//Create  trust list
-	m_pTrustList = new CStringArray;
-	
-	//limit the domain list to two for developing porpouses
-	//for (int i = 0 ; i < count; i++)
-	dbg.error(L"cDcList::GetTrustList",L"Limited the domain list to 2 for developing porpouses");
-	for (int i = 0 ; i < count && i < 2; i++)
-	{
-		m_pTrustList->Add(trusts[i].DnsDomainName);
-		dbg.trace(L"cDcList::GetTrustList",L"  %i. %wS",i,m_pTrustList->GetAt(i));
-	}
-
-	if (trusts)
-		NetApiBufferFree(trusts);
-
-	return 0;
-}
-
-// Saves all the Dc's of the forest
-int cDcList::GetDcListAll(void)
-{
-	CArray<cDcInfo> * pDcInfoList = NULL;
-	int retI;
-	int count;
-	CString Domain;
-	CString DC;
-	
-	//Get the list of domains in the forest
-	retI = GetTrustList();
-	if (!retI==ERROR_SUCCESS)
-	{
-		dbg.error(L"cDcList::GetDcListAll",L"Error building Forest domain list [%d]",retI);
-		return retI;
-	}
-
-	//Create structure to hold all the Dc info.
-	pDcInfoList = new CArray<cDcInfo>;
-
-	//iterate trough the list to get all DC's
-	count = m_pTrustList->GetCount();
-	for (int i = 0 ; i< count ;i++)
-	{
-		Domain=m_pTrustList->GetAt(i);
-		dbg.trace(L"cDcList::GetDcListAll",L"Building DcList for Domain [%wS]",Domain);
-
-		//Get DC for that Domain.
-		DC = GetDcName(Domain);
-		dbg.trace(L"cDcList::GetDcListAll",L"Retreiving Dc List for [%wS] from [%wS]",Domain,DC);
-		retI = GetDcList(DC,Domain);
-		if (!retI==ERROR_SUCCESS)
-		{
-			dbg.error(L"cDcList::GetDcListAll",L"Error retreiving Dc List for [%wS] from [%wS]",Domain,DC);
-			return retI;
-		}
-		
-		for (int j = 0; j < m_DcCount ;  j++)
-		{
-			dbg.trace(L"cDcList::GetDcListAll",L"Adding [%wS]",m_pDcInfoList->GetAt(j).m_DcDnsName);
-			pDcInfoList->Add(m_pDcInfoList->GetAt(j));	
-		}		
-		//dbg.error(L"cDcList::GetDcListAll",L"Count up to there [%d]",pDcInfoList->GetCount());
-	}
-
-	//replace m_pDcInfoList with the full copy
-
-//	dbg.error(L"cDcList::GetDcListAll",L"Delete m_pDcInfoList content [%d]",m_pDcInfoList->GetCount());
-	delete m_pDcInfoList;
-//	dbg.error(L"cDcList::GetDcListAll",L"Assigning 	<m_pDcInfoList = pDcInfoList> [%d]",pDcInfoList->GetCount());
-	m_pDcInfoList = pDcInfoList;
-	m_DcCount = pDcInfoList->GetCount();
-//	dbg.error(L"cDcList::GetDcListAll",L"m_pDcInfoList content [%d]",m_pDcInfoList->GetCount());
-	pDcInfoList=NULL;
-
-	return ERROR_SUCCESS;
-}
-
-
-// copies information to DcInfo from a DcInfo
-int cDcInfo::operator=(cDcInfo dcInfo)
-{
-	m_DcDnsName		= dcInfo.m_DcDnsName;
-	m_DcFlags		= dcInfo.m_DcFlags;
-	m_DcGUID		= dcInfo.m_DcGUID;
-	m_DcNtdsName	= dcInfo.m_DcNtdsName;
-	m_DcSiteName	= dcInfo.m_DcSiteName;
-	m_fDsEnabled	= dcInfo.m_fDsEnabled;
-	m_fIsGc			= dcInfo.m_fIsGc;
-	m_fIsPdc		= dcInfo.m_fIsPdc;
-	m_fIsRodc		= dcInfo.m_fIsRodc;
-
-	return 0;
 }

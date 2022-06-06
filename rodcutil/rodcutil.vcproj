@@ -65,8 +65,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="Ntdsapi.lib rpcrt4.lib netapi32.lib"
-				OutputFile="$(OutDir)\$(ProjectName)_v1.1.exe"
+				AdditionalDependencies="Ntdsapi.lib rpcrt4.lib"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="true"
@@ -144,8 +143,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="Ntdsapi.lib rpcrt4.lib netapi32.lib"
-				OutputFile="$(OutDir)\$(ProjectName)_v1.1.exe"
+				AdditionalDependencies="Ntdsapi.lib rpcrt4.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="true"
